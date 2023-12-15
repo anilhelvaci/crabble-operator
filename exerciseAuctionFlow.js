@@ -5,18 +5,20 @@ import { makeCrabbleFlowOffers } from "./crabbleFlow.js";
 
 /*
   Order:
-    createAdHocRental
-    buyOut
-    withdrawRentalFee
+    createAuctionRental
+    bid
+    acceptBid
+    borrow
     returnUtility
-    withdrawUtility
 
   Frequency:
     Moderate: 10 mins, 5 tx per min = 50 tx = 10 cycles
     Increased: 10 mins, 10 tx per min = 100 tx = 20 cycles
+
+  StartIndex = 1 number above current rental index on vVtorage
 */
 
-const exerciseAdHocFlow = async (startIndex, cycles) => {
+const exerciseAuctionFlow = async (startIndex, cycles) => {
   const { watch, getState, marshaller } = makeChainWatcher(
     "https://xnet.agoric.net/network-config"
   );
@@ -45,45 +47,43 @@ const exerciseAdHocFlow = async (startIndex, cycles) => {
     issuers
   );
 
-  let waitingPeriod = 0
-  
-  if (cycles === 10) {
-    waitingPeriod = 10 * 100
-  } else {
-    waitingPeriod = 5 * 100
-  }
-  const delay = () => new Promise((resolve) => setTimeout(resolve, waitingPeriod));
+  let waitingPeriod = 0;
 
-  console.log("Exercise Ad-Hoc Create Rental...");
+  if (cycles === 10) {
+    waitingPeriod = 10 * 100;
+  } else {
+    waitingPeriod = 5 * 100;
+  }
+  const delay = () =>
+    new Promise((resolve) => setTimeout(resolve, waitingPeriod));
+
+  console.log("Exercise Auction Create Rental...");
 
   for (let i = startIndex; i < startIndex + cycles; i++) {
-    console.log(`Start Ad-Hoc flow cycle: ${i - startIndex} ...`);
+    console.log(`Start Auction flow cycle: ${i - startIndex} ...`);
 
-    crabbleOffers.createAdHocRental(`createRental-${i}`, "gov1");
+    crabbleOffers.createAuctionRental(`createRental-${i}`, "gov1");
     await delay();
 
-    crabbleOffers.buyOut(`buyout-${i}`, getRentalHandle(i), "gov1");
+    crabbleOffers.bid(`bid-${i}`, getRentalHandle(i), "gov1");
     await delay();
 
-    crabbleOffers.withdrawRentalFee(
-      `withdraw-rental-fee-${i}`,
+    crabbleOffers.acceptBid(
+      `acceptBid-${i}`,
       `createRental-${i}`,
+      `bid-${i}`,
       "gov1"
     );
     await delay();
 
-    crabbleOffers.returnUtility(`adhoc-return-${i}`, `buyout-${i}`, "gov1");
+    crabbleOffers.borrow(`borrow-${i}`, `bid-${i}`, "gov1");
     await delay();
 
-    crabbleOffers.withdrawUtility(
-      `withdraw-utility-${i}`,
-      `createRental-${i}`,
-      "gov1"
-    );
+    crabbleOffers.returnUtility(`auction-return-${i}`, `bid-${i}`, "gov1");
     await delay();
 
     console.log(`Cycle finished`);
   }
 };
 
-exerciseAdHocFlow().then(() => process.exit(0));
+exerciseAuctionFlow().then(() => process.exit(0));
