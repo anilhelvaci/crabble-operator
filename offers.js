@@ -91,7 +91,15 @@ const OfferSpecs = harden({
       invitationMakerName: "borrowUtility",
     },
     proposal,
-    offerArgs: {},
+  }),
+  returnUtility: ({ id, previousOffer, proposal }) => ({
+    id,
+    invitationSpec: {
+      source: "continuing",
+      previousOffer,
+      invitationMakerName: "returnUtility",
+    },
+    proposal,
   }),
   withdrawUtility: ({ id, previousOffer, proposal }) => ({
     id,
@@ -199,6 +207,26 @@ const makeOfferSender = (marshaller) => {
     return sendWalletAction(offer, from);
   };
 
+  const sendBorrowOffer = (options, from) => {
+    const spendAction = {
+      method: "executeOffer",
+      offer: OfferSpecs.borrow(options),
+    };
+
+    const offer = JSON.stringify(marshaller.toCapData(harden(spendAction)));
+    return sendWalletAction(offer, from);
+  };
+
+  const sendReturnUtilityOffer = (options, from) => {
+    const spendAction = {
+      method: "executeOffer",
+      offer: OfferSpecs.returnUtility(options),
+    };
+
+    const offer = JSON.stringify(marshaller.toCapData(harden(spendAction)));
+    return sendWalletAction(offer, from);
+  };
+
   const sendWithdrawUtilityOffer = (options, from) => {
     const spendAction = {
       method: "executeOffer",
@@ -237,6 +265,8 @@ const makeOfferSender = (marshaller) => {
     sendBuyOutOffer,
     sendBidOffer,
     sendAcceptBidOffer,
+    sendBorrowOffer,
+    sendReturnUtilityOffer,
     sendWithdrawUtilityOffer,
     sendWithdrawCollateralOffer,
     sendWithdrawRentalFeeOffer,
