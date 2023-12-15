@@ -21,6 +21,9 @@ const makeChainWatcher = (networkConfigAddr) => {
     const instanceCastingSpec = makeCastingSpec(':published.agoricNames.instance');
     const instanceFollower = makeFollower(instanceCastingSpec, leader, options);
 
+    const lastQuestionCastingSpec = makeCastingSpec(':published.crabble.committee.latestQuestion');
+    const lastQuestionFollower = makeFollower(lastQuestionCastingSpec, leader, options);
+
     const watchBrand = async () => {
         for await (const { value: brands } of iterateLatest(brandFollower)) {
             state.brands = brands;
@@ -34,6 +37,12 @@ const makeChainWatcher = (networkConfigAddr) => {
             promiseKits.instances.resolve(true);
         }
     };
+
+    const watchLatestQuestion = async () => {
+        for await (const { value: latestQuestion } of iterateLatest(lastQuestionFollower)) {
+            state.latestQuestion = latestQuestion;
+        }
+    };
     
     const getState = async () => {
         await Promise.all([
@@ -44,15 +53,29 @@ const makeChainWatcher = (networkConfigAddr) => {
         return harden({ ...state });
     };
 
+    const getLatestQuestionHandle = () => {
+        const { latestQuestion } = state;
+
+        if (!latestQuestion) throw new Error('No latest question');
+
+        if (latestQuestion.closingRule.deadline * 1000n > BigInt(Date.now())) {
+            return harden({ active: true, questionHandle: latestQuestion.questionHandle});
+        }
+
+        return harden({ active: false, questionHandle: latestQuestion.questionHandle});
+    };
+
     const watch = () => {
         watchBrand();
-        watchInstance()
+        watchInstance();
+        watchLatestQuestion();
     };
 
     return harden({
         watch,
         getState,
         marshaller,
+        getLatestQuestionHandle,
     });
 };
 harden(makeChainWatcher);

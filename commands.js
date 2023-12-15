@@ -15,7 +15,7 @@ const SIGN_BROADCAST_OPTS = (rpc, chainID) => [
     "--gas=auto",
 	"--gas-adjustment=1.2",
     "--yes",
-    "-b block",
+    "-b async",
     "--node",
     rpc,
 	"--output json",
@@ -34,7 +34,7 @@ const agd = {
         swingset: {
             // Offer = cap data
             walletAction: (offer, from) => [agdBin, 'tx', 'swingset', 'wallet-action', `'${offer}'`, `--from=${from}`,
-                '--allow-spend', ...SIGN_BROADCAST_OPTS('http://localhost:26657', 'agoriclocal')].join(' '),
+                '--allow-spend', ...SIGN_BROADCAST_OPTS('https://xnet.rpc.agoric.net:443', 'agoric-mainfork-1')].join(' '),
         }
     }
 };

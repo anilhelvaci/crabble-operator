@@ -3,7 +3,7 @@ import { makeChainWatcher } from "./chainWatcher.js";
 import { makeOfferSender } from "./offers.js";
 
 const exerciseGovInvitations = async () => {
-  const { watch, getState, marshaller } = makeChainWatcher(' https://wallet.agoric.app/wallet/network-config');
+  const { watch, getState, marshaller } = makeChainWatcher('https://xnet.agoric.net/network-config');
   const offerSender = makeOfferSender(marshaller);
 
   watch();
