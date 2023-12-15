@@ -48,7 +48,7 @@ const makeOfferSender = (marshaller) => {
       };
 
       const offer = JSON.stringify(marshaller.toCapData(harden(spendAction)));
-      sendWalletAction(offer, from);
+      return sendWalletAction(offer, from);
   };
 
   const askPauseOffersQuestion = (options, from) => {
@@ -58,7 +58,7 @@ const makeOfferSender = (marshaller) => {
       };
 
       const offer = JSON.stringify(marshaller.toCapData(harden(spendAction)));
-      sendWalletAction(offer, from);
+      return sendWalletAction(offer, from);
   };
 
   const votePositive = (options, from) => {
@@ -70,7 +70,7 @@ const makeOfferSender = (marshaller) => {
       };
 
       const offer = JSON.stringify(marshaller.toCapData(harden(spendAction)));
-      sendWalletAction(offer, from);
+      return sendWalletAction(offer, from);
   };
 
   return harden({
