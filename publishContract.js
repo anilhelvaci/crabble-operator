@@ -1,10 +1,10 @@
-import { publishContract } from "./commands";
+import { publishContract } from "./commands.js";
 
 const main = () => {
   const params = {
     rpc: "http://0.0.0.0:26657",
     chain_id: "agoriclocal",
-    key: "gov1",
+    key: "gov3",
     deposit: "1000000ubld",
     gas: "auto",
     adjustment: "1.2",
@@ -12,8 +12,8 @@ const main = () => {
     description: "Crabble core-eval for source contract",
   };
 
-  const bundleContract = "@/crabble-operator/assets/bundle-contract.json";
-  const bundleGov = "@/crabble-operator/assets/bundle-governor.json";
+  const bundleContract = "@/operator/assets/bundle-contract.json";
+  const bundleGov = "@/operator/assets/bundle-governor.json";
 
   publishContract(bundleContract, params);
   publishContract(bundleGov, params);

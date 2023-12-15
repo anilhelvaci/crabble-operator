@@ -1,25 +1,25 @@
-import { submitCoreEval } from "./commands";
+import { submitCoreEval } from "./commands.js";
 
 const main = () => {
   const params = {
     rpc: "http://0.0.0.0:26657",
     chain_id: "agoriclocal",
-    key: "gov1",
-    deposit: "1000000ubld",
+    key: "gov3",
+    deposit: "10000000ubld",
     gas: "auto",
     adjustment: "1.2",
     title: "Crabble-rc2",
-    description: "Crabble core-eval for source contract",
+    description: "Crabble_core-eval_for_source_contract",
   };
 
   const coreEvalList = [
     [
-      "crabble-operator/assets/gov-permit.json",
-      "crabble-operator/assets/govStarting.js",
+      "./assets/gov-permit.json",
+      "./assets/govStarting.js",
     ],
     [
-      "crabble-operator/assets/crabble-permit.json",
-      "crabble-operator/assets/crabbleCoreEval.js",
+      "./assets/crabble-permit.json",
+      "./assets/crabbleCoreEval.js",
     ],
   ];
 
