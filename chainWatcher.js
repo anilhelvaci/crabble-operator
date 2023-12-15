@@ -12,11 +12,15 @@ const makeChainWatcher = (networkConfigAddr) => {
     const state = {};
     const promiseKits = harden({
         brands: makePromiseKit(),
+        issuers: makePromiseKit(),
         instances: makePromiseKit(),
     });
 
     const brandCastingSpec = makeCastingSpec(':published.agoricNames.brand');
     const brandFollower = makeFollower(brandCastingSpec, leader, options);
+
+    const issuerCastingSpec = makeCastingSpec(':published.agoricNames.issuer');
+    const issuerFollower = makeFollower(issuerCastingSpec, leader, options);
 
     const instanceCastingSpec = makeCastingSpec(':published.agoricNames.instance');
     const instanceFollower = makeFollower(instanceCastingSpec, leader, options);
@@ -28,6 +32,13 @@ const makeChainWatcher = (networkConfigAddr) => {
         for await (const { value: brands } of iterateLatest(brandFollower)) {
             state.brands = brands;
             promiseKits.brands.resolve(true);
+        }
+    };
+
+    const watchIssuer = async () => {
+        for await (const { value: issuers } of iterateLatest(issuerFollower)) {
+           state.issuers = issuers;
+            promiseKits.issuers.resolve(true);
         }
     };
 
@@ -67,6 +78,7 @@ const makeChainWatcher = (networkConfigAddr) => {
 
     const watch = () => {
         watchBrand();
+        watchIssuer();
         watchInstance();
         watchLatestQuestion();
     };
