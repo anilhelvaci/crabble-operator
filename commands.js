@@ -45,15 +45,15 @@ const agd = {
       params.gas,
       "-b block",
       "--yes",
-    ],
+    ].join(" "),
 
     submit: (coreList, params) => [
       agdBin,
       "tx",
       "gov",
       "submit-proposal",
-      ...coreList,
       "swingset-core-eval",
+      ...coreList,
       "--title",
       params.title,
       "--description",
@@ -71,7 +71,7 @@ const agd = {
       params.gas,
       "-b block",
       "--yes",
-    ],
+    ].join(" "),
 
     vote: (proposal_id, params) => [
       agdBin,
@@ -91,7 +91,7 @@ const agd = {
       params.gas,
       "-b block",
       "--yes",
-    ],
+    ].join(" "),
   },
 };
 
