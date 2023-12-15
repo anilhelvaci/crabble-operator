@@ -14,6 +14,7 @@ const makeChainWatcher = (networkConfigAddr) => {
         brands: makePromiseKit(),
         issuers: makePromiseKit(),
         instances: makePromiseKit(),
+        rentals: makePromiseKit(),
     });
 
     const brandCastingSpec = makeCastingSpec(':published.agoricNames.brand');
@@ -24,6 +25,9 @@ const makeChainWatcher = (networkConfigAddr) => {
 
     const instanceCastingSpec = makeCastingSpec(':published.agoricNames.instance');
     const instanceFollower = makeFollower(instanceCastingSpec, leader, options);
+
+    const rentalCastingSpec = makeCastingSpec(':published.crabble.rentals');
+    const rentalFollower = makeFollower(rentalCastingSpec, leader, options);
 
     const lastQuestionCastingSpec = makeCastingSpec(':published.crabble.committee.latestQuestion');
     const lastQuestionFollower = makeFollower(lastQuestionCastingSpec, leader, options);
@@ -46,6 +50,13 @@ const makeChainWatcher = (networkConfigAddr) => {
         for await (const { value: instances } of iterateLatest(instanceFollower)) {
            state.instances = instances;
             promiseKits.instances.resolve(true);
+        }
+    };
+
+    const watchRentals = async () => {
+        for await (const { value: rentals } of iterateLatest(rentalFollower)) {
+           state.rentals = rentals;
+            promiseKits.rentals.resolve(true);
         }
     };
 
@@ -80,6 +91,7 @@ const makeChainWatcher = (networkConfigAddr) => {
         watchBrand();
         watchIssuer();
         watchInstance();
+        watchRentals(),
         watchLatestQuestion();
     };
 
