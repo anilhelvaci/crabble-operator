@@ -86,4 +86,4 @@ const exerciseAuctionFlow = async (startIndex, cycles) => {
   }
 };
 
-exerciseAuctionFlow().then(() => process.exit(0));
+exerciseAuctionFlow(startIndex, cycles).then(() => process.exit(0));

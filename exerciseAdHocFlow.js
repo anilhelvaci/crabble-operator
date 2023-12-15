@@ -88,4 +88,4 @@ const exerciseAdHocFlow = async (startIndex, cycles) => {
   }
 };
 
-exerciseAdHocFlow().then(() => process.exit(0));
+exerciseAdHocFlow(startIndex, cycles).then(() => process.exit(0));
