@@ -120,6 +120,43 @@ const makeCrabbleFlowOffers = async (
     );
   };
 
+  const borrow = (offerId, rentalId, from) => {
+    offerSender.sendBorrowOffer(
+      {
+        id: offerId,
+        previousOffer: rentalId,
+        proposal: {
+          give: {
+            Collateral: collateralAmount,
+            RentalFee: rentalFeeAmount,
+          },
+          want: {
+            Utility: utilityAmount,
+          },
+        },
+      },
+      from
+    );
+  };
+
+  const returnUtility = (offerId, buyOutId, from) => {
+    offerSender.sendReturnUtilityOffer(
+      {
+        id: offerId,
+        previousOffer: buyOutId,
+        proposal: {
+          give: {
+            Utility: utilityAmount,
+          },
+          want: {
+            Collateral: collateralAmount,
+          },
+        },
+      },
+      from
+    );
+  };
+
   const withdrawUtility = (offerId, rentalId, from) => {
     offerSender.sendWithdrawUtilityOffer(
       {
@@ -165,6 +202,8 @@ const makeCrabbleFlowOffers = async (
     buyOut,
     bid,
     acceptBid,
+    borrow,
+    returnUtility,
     withdrawUtility,
     withdrawCollateral,
     withdrawRentalFee,
