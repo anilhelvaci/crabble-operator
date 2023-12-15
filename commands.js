@@ -4,8 +4,21 @@ import { readFileSync } from "fs";
 const agdBin = 'agd'
 
 const GLOBAL_OPTIONS = [
-    // '--keyring-backend=test',
+    '--keyring-backend=test',
     '--output=json'
+];
+
+const SIGN_BROADCAST_OPTS = (rpc, chainID) => [
+    "--keyring-backend=test",
+    "--chain-id",
+    chainID,
+    "--gas=auto",
+	"--gas-adjustment=1.2",
+    "--yes",
+    "-b async",
+    "--node",
+    rpc,
+	"--output json",
 ];
 
 const agd = {
@@ -17,17 +30,25 @@ const agd = {
             proposals: (rpc) => [agdBin, 'query', 'gov', 'proposals', '--node', rpc, ...GLOBAL_OPTIONS].join(' '),
         }
     },
-
+    tx: {
+        swingset: {
+            // Offer = cap data
+            walletAction: (offer, from) => [agdBin, 'tx', 'swingset', 'wallet-action', `'${offer}'`, `--from=${from}`,
+                '--allow-spend', ...SIGN_BROADCAST_OPTS('https://xnet.rpc.agoric.net:443', 'agoric-mainfork-1')].join(' '),
+        }
+    }
 };
 
 const execute = (cmd, options = {}) => {
+    console.log('Executing: ', cmd)
     return execSync(cmd, { stdio: "inherit", encoding: "utf-8", ...options });
 };
 
 const recoverFromMnemonic = (name) => {
     console.log(`Recovering account ${name}...`);
     const mnemonic = readFileSync(`./mnemonics/${name}-mnemonic`, { encoding: "utf-8"});
-    execute(agd.keys.add(name), { input: mnemonic});
+    console.log({ mnemonic })
+    execute(agd.keys.add(name), { input: mnemonic, stdio: "pipe" });
     console.log(`Account recovered: ${name}`)
 };
 
@@ -37,14 +58,12 @@ const queryProposals = rpc => {
     console.log('Last Proposal', proposalsParse.proposals.slice(-1))
 };
 
-console.log({
-    cmd: agd.query.gov.proposals('https://xnet.rpc.agoric.net:443')
-})
-
-queryProposals('https://xnet.rpc.agoric.net:443');
+const sendWalletAction = (offer, from) => {
+    execute(agd.tx.swingset.walletAction(offer, from));
+};
 
 export {
-    agd,
-    execute,
     recoverFromMnemonic,
+    queryProposals,
+    sendWalletAction
 };

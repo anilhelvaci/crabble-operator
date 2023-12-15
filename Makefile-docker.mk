@@ -40,7 +40,7 @@ mint-ist:
 	make FUNDS=$(GIVE_VALUE)$(ATOM) ACCT_ADDR=$(TO) fund-acct -f Makefile
 	cd $(AGORIC_BIN_PATH) && \
 		yarn --silent agops vaults open --wantMinted $(WANT_VALUE) --giveCollateral $(GIVE_VALUE) >/tmp/want4k.json && \
-		yarn --silent agops perf satisfaction --executeOffer /tmp/want4k.json --from gov1 --keyring-backend=test
+		yarn --silent agops perf satisfaction --executeOffer /tmp/want4k.json --from $(TO) --keyring-backend=test
 	sleep 3
 
 FUNDS=321$(BLD)
