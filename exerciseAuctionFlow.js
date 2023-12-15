@@ -15,7 +15,7 @@ import { makeCrabbleFlowOffers } from "./crabbleFlow.js";
     Moderate: 10 mins, 5 tx per min = 50 tx = 10 cycles
     Increased: 10 mins, 10 tx per min = 100 tx = 20 cycles
 
-  StartIndex = 1 number above current rental index on vVtorage
+  StartIndex = 1 number above current rental index on vStorage
 */
 
 const exerciseAuctionFlow = async (startIndex, cycles) => {
