@@ -23,7 +23,7 @@ export default {
         rentingDurationUnit: 'minute',
         minRentingDurationUnits: 1n,
         maxRentingDurationUnits: 60n,
-        gracePeriodDuration: 10n * 60n, // 10 mins grace period
+        gracePeriodDuration: 60n, // 1 min grace period
       },
     },
     {
@@ -61,8 +61,8 @@ export default {
       rentalFeeValue: 30n,
       collateralValue: 200n,
       rentalConfig: {
-        utilityTitle: 'House',
-        utilityDescription: 'Family house available for vacations',
+        utilityTitle: 'Crab',
+        utilityDescription: 'Crabs are decapod crustaceans of the infraorder Brachyura',
         rentingTier: 'Auction',
         rentingDurationUnit: 'minute',
         minRentingDurationUnits: 1n,
@@ -191,7 +191,7 @@ export default {
   content: [
     {
       keyword: 'ChainboardCollection',
-      value: [
+      value: turn => [
         {
           topic: 'Agoric',
           intakeClass: 'October 2023',
@@ -200,22 +200,26 @@ export default {
           participants: '3',
           imagePath:
             'https://firebasestorage.googleapis.com/v0/b/crabble-nfts.appspot.com/o/Chainboard%20Collection%2F1.jpg?alt=media&token=f7570df6-18e6-436d-bc01-e7445ee62dd0',
+          turn,
+          timestamp: Date.now(),
         },
       ],
     },
     {
-      keyword: 'CrabbleIst',
+      keyword: 'CrabbleIST',
       value: 1000000n * 10n ** 6n,
     },
     {
       keyword: 'CrabbleCollection',
-      value: [
+      value: turn => [
         {
           name: 'BytePitch Boys',
           color: 'Orange',
           age: '100',
           imagePath:
             "https://firebasestorage.googleapis.com/v0/b/crabble-nfts.appspot.com/o/Crabble%20Collection%2F1.jpg?alt=media",
+          turn,
+          timestamp: Date.now(),
         },
       ],
     },

@@ -13,7 +13,7 @@ const runElection = async () => {
 
     const { txhash } = offerSender.askPauseOffersQuestion({
         id: `pause-offers-prop-mem-1-${Date.now()}`,
-        filters: ['Make buyout offer'],
+        filters: [],
         prevId: 'gov-mem-1',
         duration: 60n,
     }, 'mem1');
@@ -29,14 +29,14 @@ const runElection = async () => {
     offerSender.votePositive({
         id: `vote-mem-1-${Date.now()}`,
         prevId: 'mem-1',
-        filters: ['Make buyout offer'],
+        filters: [],
         questionHandle,
     }, 'mem1');
 
     offerSender.votePositive({
         id: `vote-mem-2-${Date.now()}`,
         prevId: 'mem-2',
-        filters: ['Make buyout offer'],
+        filters: [],
         questionHandle,
     }, 'mem2');
 
@@ -44,7 +44,7 @@ const runElection = async () => {
     offerSender.votePositive({
         id: `vote-mem-3-${Date.now()}`,
         prevId: 'mem-3',
-        filters: ['Make buyout offer'],
+        filters: [],
         questionHandle,
     }, 'mem3');
 };

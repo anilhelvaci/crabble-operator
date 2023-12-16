@@ -1,6 +1,6 @@
 import "./installSesLockdown.js";
 import { AmountMath } from "@agoric/ertp";
-import scenarioConfigs from "./scenarioConfigs.js";
+import scenarioConfigs from "./loadTests/scenarioConfigs.js";
 
 const makeCrabbleFlowOffers = async (
   offerSender,
@@ -207,6 +207,10 @@ const makeCrabbleFlowOffers = async (
     withdrawUtility,
     withdrawCollateral,
     withdrawRentalFee,
+      utilityAmount,
+      collateralAmount,
+      rentalFeePerUnitAmount,
+      rentalFeeAmount
   });
 };
 harden(makeCrabbleFlowOffers);

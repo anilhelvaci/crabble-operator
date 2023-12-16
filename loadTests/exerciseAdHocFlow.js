@@ -1,7 +1,7 @@
 import "./installSesLockdown.js";
 import { makeChainWatcher } from "./chainWatcher.js";
 import { makeOfferSender } from "./offers.js";
-import { makeCrabbleFlowOffers } from "./crabbleFlow.js";
+import { makeCrabbleFlowOffers } from "./loadTests/crabbleFlow.js";
 
 /*
   Order:

@@ -50,7 +50,7 @@ const OfferSpecs = harden({
     id,
     invitationSpec: {
       source: "agoricContract",
-      instance,
+      instancePath: [instance],
       callPipe: [
         ["getRentalByHandle", [rentalHandle]],
         ["makeBuyOutInvitation"],
@@ -127,6 +127,19 @@ const OfferSpecs = harden({
       invitationMakerName: "withdrawRentalFee",
     },
     proposal,
+  }),
+  faucet: ({keyword, amount}) => ({
+    id: `mint-${keyword}-${Date.now()}`,
+    invitationSpec: {
+      source: 'agoricContract',
+      instancePath: [`${keyword}Faucet`],
+      callPipe: [['makeMintInvitation']],
+    },
+    proposal: {
+      want: {
+        [keyword]: amount,
+      },
+    },
   }),
 });
 
@@ -257,6 +270,16 @@ const makeOfferSender = (marshaller) => {
     return sendWalletAction(offer, from);
   };
 
+  const fundAppUser = (options, from) => {
+    const spendAction = {
+      method: "executeOffer",
+      offer: OfferSpecs.faucet(options),
+    };
+
+    const offer = JSON.stringify(marshaller.toCapData(harden(spendAction)));
+    return sendWalletAction(offer, from);
+  };
+
   return harden({
     sendExerciseInvOffer,
     askPauseOffersQuestion,
@@ -270,6 +293,7 @@ const makeOfferSender = (marshaller) => {
     sendWithdrawUtilityOffer,
     sendWithdrawCollateralOffer,
     sendWithdrawRentalFeeOffer,
+    fundAppUser,
   });
 };
 harden(makeOfferSender);

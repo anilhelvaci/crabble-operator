@@ -14,7 +14,6 @@ const makeChainWatcher = (networkConfigAddr) => {
         brands: makePromiseKit(),
         issuers: makePromiseKit(),
         instances: makePromiseKit(),
-        rentals: makePromiseKit(),
     });
 
     const brandCastingSpec = makeCastingSpec(':published.agoricNames.brand');
@@ -26,8 +25,7 @@ const makeChainWatcher = (networkConfigAddr) => {
     const instanceCastingSpec = makeCastingSpec(':published.agoricNames.instance');
     const instanceFollower = makeFollower(instanceCastingSpec, leader, options);
 
-    const rentalCastingSpec = makeCastingSpec(':published.crabble.rentals');
-    const rentalFollower = makeFollower(rentalCastingSpec, leader, options);
+
 
     const lastQuestionCastingSpec = makeCastingSpec(':published.crabble.committee.latestQuestion');
     const lastQuestionFollower = makeFollower(lastQuestionCastingSpec, leader, options);
@@ -42,7 +40,7 @@ const makeChainWatcher = (networkConfigAddr) => {
     const watchIssuer = async () => {
         for await (const { value: issuers } of iterateLatest(issuerFollower)) {
            state.issuers = issuers;
-            promiseKits.issuers.resolve(true);
+           promiseKits.issuers.resolve(true);
         }
     };
 
@@ -56,7 +54,6 @@ const makeChainWatcher = (networkConfigAddr) => {
     const watchRentals = async () => {
         for await (const { value: rentals } of iterateLatest(rentalFollower)) {
            state.rentals = rentals;
-            promiseKits.rentals.resolve(true);
         }
     };
 
@@ -87,11 +84,23 @@ const makeChainWatcher = (networkConfigAddr) => {
         return harden({ active: false, questionHandle: latestQuestion.questionHandle});
     };
 
+    const getRental = async (rentalPath) => {
+        const rentalCastingSpec = makeCastingSpec(`:published.crabble.rentals.${rentalPath}`);
+        const rentalFollower = makeFollower(rentalCastingSpec, leader, options);
+        let rental;
+
+        for await (const { value: rentalRemote } of iterateLatest(rentalFollower)) {
+            rental = rentalRemote;
+            break;
+        }
+
+        return rental;
+    };
+
     const watch = () => {
         watchBrand();
         watchIssuer();
         watchInstance();
-        watchRentals(),
         watchLatestQuestion();
     };
 
@@ -100,6 +109,7 @@ const makeChainWatcher = (networkConfigAddr) => {
         getState,
         marshaller,
         getLatestQuestionHandle,
+        getRental,
     });
 };
 harden(makeChainWatcher);
