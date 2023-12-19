@@ -1,5 +1,5 @@
-import { AmountMath } from "../_agstate/yarn-links/@agoric/ertp/src/index.js";
-import scenarioConfigs from "./scenarioConfigs.js";
+import { AmountMath } from '../_agstate/yarn-links/@agoric/ertp/src/index.js';
+import scenarioConfigs from './scenarioConfigs.js';
 
 const BASE_OFFER_IDs = harden({
     ADHOC: {
@@ -17,7 +17,7 @@ const BASE_OFFER_IDs = harden({
         RETURN_UTIL: 'return-auction-utility',
         WITHDRAW_FEE: 'withdraw-fee-adhoc',
         WITHDRAW_UTIL: 'withdraw-util-adhoc',
-    }
+    },
 });
 
 const INSTANCE_KEYWORDS = harden({
@@ -25,32 +25,20 @@ const INSTANCE_KEYWORDS = harden({
 });
 
 const getAmounts = (brands, turn) => {
-    const utilityAmount = AmountMath.make(
-        brands["CrabbleCollection"],
-        harden(scenarioConfigs.content[0].value(turn))
-    );
+    const utilityAmount = AmountMath.make(brands['CrabbleCollection'], harden(scenarioConfigs.content[0].value(turn)));
 
-    const collateralAmountFungible = AmountMath.make(
-        brands["CrabbleIST"],
-        harden(scenarioConfigs.content[1].value)
-    );
+    const collateralAmountFungible = AmountMath.make(brands['CrabbleIST'], harden(scenarioConfigs.content[1].value));
 
     const collateralAmountNonFungible = AmountMath.make(
         brands[scenarioConfigs.content[1].keyword],
-        harden(scenarioConfigs.content[0].value(turn))
+        harden(scenarioConfigs.content[0].value(turn)),
     );
 
-    const rentalFeePerUnitAmount = AmountMath.make(
-        brands["CrabbleIST"],
-        harden(scenarioConfigs.content[1].value)
-    );
+    const rentalFeePerUnitAmount = AmountMath.make(brands['CrabbleIST'], harden(scenarioConfigs.content[1].value));
 
     const rentalFeeAmount = AmountMath.make(
-        brands["CrabbleIST"],
-        harden(
-            scenarioConfigs.buyouts[0].rentingDuration *
-            scenarioConfigs.content[1].value
-        )
+        brands['CrabbleIST'],
+        harden(scenarioConfigs.buyouts[0].rentingDuration * scenarioConfigs.content[1].value),
     );
 
     return harden({
@@ -62,8 +50,4 @@ const getAmounts = (brands, turn) => {
     });
 };
 
-export {
-    BASE_OFFER_IDs,
-    INSTANCE_KEYWORDS,
-    getAmounts,
-}
+export { BASE_OFFER_IDs, INSTANCE_KEYWORDS, getAmounts };

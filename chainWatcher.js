@@ -1,14 +1,14 @@
 import { makeLeader, makeCastingSpec, makeFollower, iterateLatest } from '@agoric/casting';
 import { makeImportContext } from '@agoric/smart-wallet/src/marshal-contexts.js';
-import { makePromiseKit } from "@endo/promise-kit";
+import { makePromiseKit } from '@endo/promise-kit';
 
-const makeChainWatcher = (networkConfigAddr) => {
+const makeChainWatcher = networkConfigAddr => {
     const leader = makeLeader(networkConfigAddr);
     const { fromBoard: marshaller } = makeImportContext();
     const options = harden({
         unserializer: marshaller,
     });
-    
+
     const state = {};
     const promiseKits = harden({
         brands: makePromiseKit(),
@@ -25,8 +25,6 @@ const makeChainWatcher = (networkConfigAddr) => {
     const instanceCastingSpec = makeCastingSpec(':published.agoricNames.instance');
     const instanceFollower = makeFollower(instanceCastingSpec, leader, options);
 
-
-
     const lastQuestionCastingSpec = makeCastingSpec(':published.crabble.committee.latestQuestion');
     const lastQuestionFollower = makeFollower(lastQuestionCastingSpec, leader, options);
 
@@ -39,21 +37,21 @@ const makeChainWatcher = (networkConfigAddr) => {
 
     const watchIssuer = async () => {
         for await (const { value: issuers } of iterateLatest(issuerFollower)) {
-           state.issuers = issuers;
-           promiseKits.issuers.resolve(true);
+            state.issuers = issuers;
+            promiseKits.issuers.resolve(true);
         }
     };
 
     const watchInstance = async () => {
         for await (const { value: instances } of iterateLatest(instanceFollower)) {
-           state.instances = instances;
+            state.instances = instances;
             promiseKits.instances.resolve(true);
         }
     };
 
     const watchRentals = async () => {
         for await (const { value: rentals } of iterateLatest(rentalFollower)) {
-           state.rentals = rentals;
+            state.rentals = rentals;
         }
     };
 
@@ -62,12 +60,9 @@ const makeChainWatcher = (networkConfigAddr) => {
             state.latestQuestion = latestQuestion;
         }
     };
-    
+
     const getState = async () => {
-        await Promise.all([
-            promiseKits.brands.promise,
-            promiseKits.instances.promise,
-        ]);
+        await Promise.all([promiseKits.brands.promise, promiseKits.instances.promise]);
 
         return harden({ ...state });
     };
@@ -78,13 +73,13 @@ const makeChainWatcher = (networkConfigAddr) => {
         if (!latestQuestion) throw new Error('No latest question');
 
         if (latestQuestion.closingRule.deadline * 1000n > BigInt(Date.now())) {
-            return harden({ active: true, questionHandle: latestQuestion.questionHandle});
+            return harden({ active: true, questionHandle: latestQuestion.questionHandle });
         }
 
-        return harden({ active: false, questionHandle: latestQuestion.questionHandle});
+        return harden({ active: false, questionHandle: latestQuestion.questionHandle });
     };
 
-    const getRental = async (rentalPath) => {
+    const getRental = async rentalPath => {
         const rentalCastingSpec = makeCastingSpec(`:published.crabble.rentals.${rentalPath}`);
         const rentalFollower = makeFollower(rentalCastingSpec, leader, options);
         let rental;

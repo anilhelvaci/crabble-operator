@@ -1,7 +1,7 @@
-import "./installSesLockdown.js";
-import { makeChainWatcher } from "./chainWatcher.js";
-import { makeOfferSender } from "./offers.js";
-import { makeCrabbleFlowOffers } from "./loadTests/crabbleFlow.js";
+import './installSesLockdown.js';
+import { makeChainWatcher } from './chainWatcher.js';
+import { makeOfferSender } from './offers.js';
+import { makeCrabbleFlowOffers } from './loadTests/crabbleFlow.js';
 
 /*
   Order:
@@ -19,73 +19,53 @@ import { makeCrabbleFlowOffers } from "./loadTests/crabbleFlow.js";
 */
 
 const exerciseAdHocFlow = async (startIndex, cycles) => {
-  const { watch, getState, marshaller } = makeChainWatcher(
-    "https://xnet.agoric.net/network-config"
-  );
-  const offerSender = makeOfferSender(marshaller);
+    const { watch, getState, marshaller } = makeChainWatcher('https://xnet.agoric.net/network-config');
+    const offerSender = makeOfferSender(marshaller);
 
-  watch();
-  const {
-    instances: rawInstances,
-    brands: rawBrands,
-    issuers: rawIssuers,
-    rentals: rawRentals,
-  } = await getState();
-  const instances = Object.fromEntries(rawInstances);
-  const brands = Object.fromEntries(rawBrands);
-  const issuers = Object.fromEntries(rawIssuers);
-  const rentals = Object.fromEntries(rawRentals);
+    watch();
+    const { instances: rawInstances, brands: rawBrands, issuers: rawIssuers, rentals: rawRentals } = await getState();
+    const instances = Object.fromEntries(rawInstances);
+    const brands = Object.fromEntries(rawBrands);
+    const issuers = Object.fromEntries(rawIssuers);
+    const rentals = Object.fromEntries(rawRentals);
 
-  const getRentalHandle = (index) => {
-    return rentals[`rental${index}`].rentalHandle;
-  };
+    const getRentalHandle = index => {
+        return rentals[`rental${index}`].rentalHandle;
+    };
 
-  const crabbleOffers = makeCrabbleFlowOffers(
-    offerSender,
-    instances,
-    brands,
-    issuers
-  );
+    const crabbleOffers = makeCrabbleFlowOffers(offerSender, instances, brands, issuers);
 
-  let waitingPeriod = 0
-  
-  if (cycles === 10) {
-    waitingPeriod = 10 * 100
-  } else {
-    waitingPeriod = 5 * 100
-  }
-  const delay = () => new Promise((resolve) => setTimeout(resolve, waitingPeriod));
+    let waitingPeriod = 0;
 
-  console.log("Exercise Ad-Hoc Create Rental...");
+    if (cycles === 10) {
+        waitingPeriod = 10 * 100;
+    } else {
+        waitingPeriod = 5 * 100;
+    }
+    const delay = () => new Promise(resolve => setTimeout(resolve, waitingPeriod));
 
-  for (let i = startIndex; i < startIndex + cycles; i++) {
-    console.log(`Start Ad-Hoc flow cycle: ${i - startIndex} ...`);
+    console.log('Exercise Ad-Hoc Create Rental...');
 
-    crabbleOffers.createAdHocRental(`createRental-${i}`, "gov1");
-    await delay();
+    for (let i = startIndex; i < startIndex + cycles; i++) {
+        console.log(`Start Ad-Hoc flow cycle: ${i - startIndex} ...`);
 
-    crabbleOffers.buyOut(`buyout-${i}`, getRentalHandle(i), "gov1");
-    await delay();
+        crabbleOffers.createAdHocRental(`createRental-${i}`, 'gov1');
+        await delay();
 
-    crabbleOffers.withdrawRentalFee(
-      `withdraw-rental-fee-${i}`,
-      `createRental-${i}`,
-      "gov1"
-    );
-    await delay();
+        crabbleOffers.buyOut(`buyout-${i}`, getRentalHandle(i), 'gov1');
+        await delay();
 
-    crabbleOffers.returnUtility(`adhoc-return-${i}`, `buyout-${i}`, "gov1");
-    await delay();
+        crabbleOffers.withdrawRentalFee(`withdraw-rental-fee-${i}`, `createRental-${i}`, 'gov1');
+        await delay();
 
-    crabbleOffers.withdrawUtility(
-      `withdraw-utility-${i}`,
-      `createRental-${i}`,
-      "gov1"
-    );
-    await delay();
+        crabbleOffers.returnUtility(`adhoc-return-${i}`, `buyout-${i}`, 'gov1');
+        await delay();
 
-    console.log(`Cycle finished`);
-  }
+        crabbleOffers.withdrawUtility(`withdraw-utility-${i}`, `createRental-${i}`, 'gov1');
+        await delay();
+
+        console.log(`Cycle finished`);
+    }
 };
 
 exerciseAdHocFlow(startIndex, cycles).then(() => process.exit(0));

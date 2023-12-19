@@ -2,12 +2,27 @@
   "name": "crabble-operator",
   "version": "1.0.0",
   "type": "module",
+  "scripts": {
+    "style:check": "prettier \"**/*.{js,ts}\" --check",
+    "style:fix": "prettier \"**/*.{js,ts}\" --write"
+  },
   "dependencies": {
     "@agoric/casting": "latest",
     "@agoric/governance": "^0.10.4-u13.0",
     "@agoric/smart-wallet": "latest",
     "ses": "0.18.8",
     "@endo/eventual-send": "^1.0.0",
-    "@endo/promise-kit": "^1.0.0"
+    "@endo/promise-kit": "^1.0.0",
+    "prettier": "^3.0.3"
+  },
+  "prettier": {
+    "printWidth": 120,
+    "tabWidth": 4,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "all",
+    "bracketSpacing": true,
+    "arrowParens": "avoid",
+    "endOfLine": "lf"
   }
 }

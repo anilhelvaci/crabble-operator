@@ -1,55 +1,74 @@
 import './installSesLockdown.js';
-import { makeChainWatcher } from "./chainWatcher.js";
-import { makeOfferSender } from "./offers.js";
-import { pollTx } from "./_agstate/yarn-links/agoric/src/lib/chain.js";
-import { execFileSync } from "child_process";
+import { initWatcher, logger, sleep } from './helpers.js';
 
 const runElection = async () => {
-    const { watch, getState, marshaller, getLatestQuestionHandle } = makeChainWatcher('https://wallet.agoric.app/wallet/network-config');
-    const offerSender = makeOfferSender(marshaller);
+    const filters = ['Make bid offer'];
+    const networkConfig = 'https://main.agoric.net/network-config';
+    const {
+        chainWatcher: { watch, getLatestQuestionHandle, getState },
+        offerSender,
+    } = await initWatcher(networkConfig);
 
     watch();
     await getState();
 
-    const { txhash } = offerSender.askPauseOffersQuestion({
-        id: `pause-offers-prop-mem-1-${Date.now()}`,
-        filters: [],
-        prevId: 'gov-mem-1',
-        duration: 60n,
-    }, 'mem1');
+    const questionInfo = await offerSender.askPauseOffersQuestion(
+        {
+            id: `pause-offers-prop-mem-1-${Date.now()}`,
+            filters,
+            prevId: 'gov-mem-1',
+            duration: 180n,
+        },
+        'mem1',
+    );
 
-    await pollTx(txhash, {
-        execFileSync,
-        delay: ms => new Promise(resolve => setTimeout(resolve, ms)),
-        rpcAddrs: ['http://localhost:26657']
-    });
+    logger('[RUN_ELECTION - Question Asked]', questionInfo);
+    await sleep(1000);
 
     const { active, questionHandle } = getLatestQuestionHandle();
     console.log('STATE:', active);
-    offerSender.votePositive({
-        id: `vote-mem-1-${Date.now()}`,
-        prevId: 'mem-1',
-        filters: [],
-        questionHandle,
-    }, 'mem1');
+    await offerSender.votePositive(
+        {
+            id: `vote-mem-1-${Date.now()}`,
+            prevId: 'mem-1',
+            filters,
+            questionHandle,
+        },
+        'mem1',
+    );
+    logger('[RUN_ELECTION]', 'mem1 voted');
+    await sleep(1000);
 
-    offerSender.votePositive({
-        id: `vote-mem-2-${Date.now()}`,
-        prevId: 'mem-2',
-        filters: [],
-        questionHandle,
-    }, 'mem2');
+    await offerSender.votePositive(
+        {
+            id: `vote-mem-2-${Date.now()}`,
+            prevId: 'mem-2',
+            filters,
+            questionHandle,
+        },
+        'mem2',
+    );
+    logger('[RUN_ELECTION]', 'mem2 voted');
+    await sleep(1000);
 
-    console.log('STATE:', active);
-    offerSender.votePositive({
-        id: `vote-mem-3-${Date.now()}`,
-        prevId: 'mem-3',
-        filters: [],
-        questionHandle,
-    }, 'mem3');
+    await offerSender.votePositive(
+        {
+            id: `vote-mem-3-${Date.now()}`,
+            prevId: 'mem-3',
+            filters,
+            questionHandle,
+        },
+        'mem3',
+    );
+    logger('[RUN_ELECTION]', 'mem3 voted');
 };
 
-runElection().then(() => {
-    console.log('We are done, exiting with code 0.');
-    process.exit(0);
-})
+runElection()
+    .then(() => {
+        logger('[RUN_ELECTION - Success]', 'We are done, exiting with code 0.');
+        process.exit(0);
+    })
+    .catch(err => {
+        logger('[RUN_ELECTION - Error]', err);
+        process.exit(1);
+    });

@@ -10,21 +10,19 @@
 // XMPORT { CONTRACT_ELECTORATE, ParamTypes } from '@agoric/governance';
 const CONTRACT_ELECTORATE = 'Electorate';
 const ParamTypes = /** @type {const} */ ({
-  INVITATION: 'invitation',
+    INVITATION: 'invitation',
 });
 
 const { fromEntries, entries } = Object;
 
 /** @type { <T extends Record<string, ERef<any>>>(obj: T) => Promise<{ [K in keyof T]: Awaited<T[K]>}> } */
-const allValues = async (obj) => {
-  const es = await Promise.all(
-    entries(obj).map(async ([k, v]) => [k, await v]),
-  );
-  return fromEntries(es);
+const allValues = async obj => {
+    const es = await Promise.all(entries(obj).map(async ([k, v]) => [k, await v]));
+    return fromEntries(es);
 };
 
-const logger = (message) => {
-  console.log('[PRODUCE_UPGRADABLE_STARTER]', message);
+const logger = message => {
+    console.log('[PRODUCE_UPGRADABLE_STARTER]', message);
 };
 
 /**
@@ -60,88 +58,74 @@ const logger = (message) => {
  * @returns {Promise<GovernanceFacetKit<SF>>}
  */
 const startCrabbleGovernedInstance = async (
-  {
-    zoe,
-    governedContractInstallation,
-    issuerKeywordRecord,
-    terms,
-    privateArgs,
-    label,
-  },
-  {
-    governedParams,
-    timer,
-    contractGovernor,
-    governorTerms,
-    committeeCreatorFacet,
-  },
+    { zoe, governedContractInstallation, issuerKeywordRecord, terms, privateArgs, label },
+    { governedParams, timer, contractGovernor, governorTerms, committeeCreatorFacet },
 ) => {
-  const logger = (message) => {
-    console.log('[START_GOVERNED_INSTANCE]', message);
-  };
+    const logger = message => {
+        console.log('[START_GOVERNED_INSTANCE]', message);
+    };
 
-  logger('Getting poser invitation...');
-  const poserInvitationP = E(committeeCreatorFacet).getPoserInvitation();
-  const [initialPoserInvitation, electorateInvitationAmount] =
-    await Promise.all([
-      poserInvitationP,
-      E(E(zoe).getInvitationIssuer()).getAmountOf(poserInvitationP),
+    logger('Getting poser invitation...');
+    const poserInvitationP = E(committeeCreatorFacet).getPoserInvitation();
+    const [initialPoserInvitation, electorateInvitationAmount] = await Promise.all([
+        poserInvitationP,
+        E(E(zoe).getInvitationIssuer()).getAmountOf(poserInvitationP),
     ]);
 
-  logger('Fulfilling governor terms...');
-  const fullGovernorTerms = await allValues({
-    timer,
-    governedContractInstallation,
-    governed: {
-      terms: {
-        ...terms,
-        governedParams: {
-          [CONTRACT_ELECTORATE]: {
-            type: ParamTypes.INVITATION,
-            value: electorateInvitationAmount,
-          },
-          ...governedParams,
+    logger('Fulfilling governor terms...');
+    const fullGovernorTerms = await allValues({
+        timer,
+        governedContractInstallation,
+        governed: {
+            terms: {
+                ...terms,
+                governedParams: {
+                    [CONTRACT_ELECTORATE]: {
+                        type: ParamTypes.INVITATION,
+                        value: electorateInvitationAmount,
+                    },
+                    ...governedParams,
+                },
+            },
+            issuerKeywordRecord,
+            label,
         },
-      },
-      issuerKeywordRecord,
-      label,
-    },
-    ...governorTerms,
-  });
+        ...governorTerms,
+    });
 
-  logger('Starting governor...');
-  const governorFacets = await E(zoe).startInstance(
-    contractGovernor,
-    {},
-    fullGovernorTerms,
-    harden({
-      economicCommitteeCreatorFacet: committeeCreatorFacet,
-      governed: await allValues({
-        ...privateArgs,
-        initialPoserInvitation,
-      }),
-    }),
-    `${label}-governor`,
-  );
+    logger('Starting governor...');
+    const governorFacets = await E(zoe).startInstance(
+        contractGovernor,
+        {},
+        fullGovernorTerms,
+        harden({
+            economicCommitteeCreatorFacet: committeeCreatorFacet,
+            governed: await allValues({
+                ...privateArgs,
+                initialPoserInvitation,
+            }),
+        }),
+        `${label}-governor`,
+    );
 
-  logger('Getting facets...');
-  const [instance, publicFacet, creatorFacet, adminFacet] = await Promise.all([
-    E(governorFacets.creatorFacet).getInstance(),
-    E(governorFacets.creatorFacet).getPublicFacet(),
-    E(governorFacets.creatorFacet).getCreatorFacet(),
-    E(governorFacets.creatorFacet).getAdminFacet(),
-  ]);
-  /** @type {GovernanceFacetKit<SF>} */
-  const facets = harden({
-    instance,
-    publicFacet,
-    governor: governorFacets.instance,
-    creatorFacet,
-    adminFacet,
-    governorCreatorFacet: governorFacets.creatorFacet,
-    governorAdminFacet: governorFacets.adminFacet,
-  });
-  return facets;
+    logger('Getting facets...');
+    const [instance, publicFacet, creatorFacet, adminFacet] = await Promise.all([
+        E(governorFacets.creatorFacet).getInstance(),
+        E(governorFacets.creatorFacet).getPublicFacet(),
+        E(governorFacets.creatorFacet).getCreatorFacet(),
+        E(governorFacets.creatorFacet).getAdminFacet(),
+    ]);
+    /** @type {GovernanceFacetKit<SF>} */
+    const facets = harden({
+        instance,
+        publicFacet,
+        governor: governorFacets.instance,
+        creatorFacet,
+        adminFacet,
+        governorCreatorFacet: governorFacets.creatorFacet,
+        governorAdminFacet: governorFacets.adminFacet,
+    });
+    return facets;
 };
 
 /**
@@ -152,65 +136,63 @@ const startCrabbleGovernedInstance = async (
  * }} powers
  */
 const produceStartCrabbleGovernedUpgradable = async ({
-  consume: { chainTimerService, governedContractKits, diagnostics, zoe },
-  produce, // startCrabbleGovernedUpgradable
+    consume: { chainTimerService, governedContractKits, diagnostics, zoe },
+    produce, // startCrabbleGovernedUpgradable
 }) => {
-  logger('Producing governed upgradable...');
-  /**
-   * @template {GovernableStartFn} SF
-   * @param {StartGovernedUpgradableOpts<SF> & {
-   *   committeeCreatorFacet: CommitteeStart['creatorFacet'];
-   *   contractGovernor: ERef<Installation>;
-   *   governorTerms: Record<string, unknown>;
-   * }} opts
-   */
-  const startGovernedUpgradable = async ({
-    installation,
-    issuerKeywordRecord,
-    committeeCreatorFacet,
-    contractGovernor,
-    governorTerms,
-    governedParams,
-    terms,
-    privateArgs,
-    label,
-  }) => {
-    const contractKits = await governedContractKits;
-    logger('Init startCrabbleGovernedInstance...');
-    const facets = await startCrabbleGovernedInstance(
-      {
-        zoe,
-        governedContractInstallation: installation,
+    logger('Producing governed upgradable...');
+    /**
+     * @template {GovernableStartFn} SF
+     * @param {StartGovernedUpgradableOpts<SF> & {
+     *   committeeCreatorFacet: CommitteeStart['creatorFacet'];
+     *   contractGovernor: ERef<Installation>;
+     *   governorTerms: Record<string, unknown>;
+     * }} opts
+     */
+    const startGovernedUpgradable = async ({
+        installation,
         issuerKeywordRecord,
+        committeeCreatorFacet,
+        contractGovernor,
+        governorTerms,
+        governedParams,
         terms,
         privateArgs,
         label,
-      },
-      {
-        governedParams,
-        timer: chainTimerService,
-        contractGovernor,
-        committeeCreatorFacet,
-        governorTerms,
-      },
-    );
-    logger('Updating contractKits...');
-    const kit = harden({ ...facets, label });
-    contractKits.init(facets.instance, kit);
+    }) => {
+        const contractKits = await governedContractKits;
+        logger('Init startCrabbleGovernedInstance...');
+        const facets = await startCrabbleGovernedInstance(
+            {
+                zoe,
+                governedContractInstallation: installation,
+                issuerKeywordRecord,
+                terms,
+                privateArgs,
+                label,
+            },
+            {
+                governedParams,
+                timer: chainTimerService,
+                contractGovernor,
+                committeeCreatorFacet,
+                governorTerms,
+            },
+        );
+        logger('Updating contractKits...');
+        const kit = harden({ ...facets, label });
+        contractKits.init(facets.instance, kit);
 
-    logger('Updating diagnostics...');
-    await E(diagnostics).savePrivateArgs(kit.instance, privateArgs);
-    await E(diagnostics).savePrivateArgs(kit.governor, {
-      committeeCreatorFacet: await committeeCreatorFacet,
-    });
+        logger('Updating diagnostics...');
+        await E(diagnostics).savePrivateArgs(kit.instance, privateArgs);
+        await E(diagnostics).savePrivateArgs(kit.governor, {
+            committeeCreatorFacet: await committeeCreatorFacet,
+        });
 
-    return facets;
-  };
+        return facets;
+    };
 
-  produce.startCrabbleGovernedUpgradable.resolve(
-    harden(startGovernedUpgradable),
-  );
-  logger('Done.');
+    produce.startCrabbleGovernedUpgradable.resolve(harden(startGovernedUpgradable));
+    logger('Done.');
 };
 harden(produceStartCrabbleGovernedUpgradable);
 
